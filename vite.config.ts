@@ -10,12 +10,12 @@ export default defineConfig(({ mode, command, isPreview }) => {
   const publicEnv = loadEnv(mode, process.cwd(), 'VITE_');
   const permitted = new Set(['VITE_API_BASE_URL']);
   for (const key of Object.keys({ ...publicEnv, ...process.env })) {
-    const vercelPublicMetadata = /^VITE_VERCEL_(ENV|TARGET_ENV|URL|BRANCH_URL|PROJECT_PRODUCTION_URL|PROJECT_ID|ORG_ID|REGION|DEPLOYMENT_ID|GIT_(PROVIDER|REPO_SLUG|REPO_OWNER|REPO_ID|COMMIT_REF|COMMIT_SHA|COMMIT_MESSAGE|COMMIT_AUTHOR_LOGIN|COMMIT_AUTHOR_NAME|PREVIOUS_SHA|PULL_REQUEST_ID))$/.test(key);
+    const vercelPublicMetadata = key === 'VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG' || /^VITE_VERCEL_(ENV|TARGET_ENV|URL|BRANCH_URL|PROJECT_PRODUCTION_URL|PROJECT_ID|ORG_ID|REGION|DEPLOYMENT_ID|GIT_(PROVIDER|REPO_SLUG|REPO_OWNER|REPO_ID|COMMIT_REF|COMMIT_SHA|COMMIT_MESSAGE|COMMIT_AUTHOR_LOGIN|COMMIT_AUTHOR_NAME|PREVIOUS_SHA|PULL_REQUEST_ID))$/.test(key);
     if (key.startsWith('VITE_') && !permitted.has(key) && !vercelPublicMetadata) throw new Error(`Unexpected public environment variable: ${key}. Only API URL and Vercel public metadata are allowed.`);
   }
   resolveApiBaseUrl(process.env.VITE_API_BASE_URL ?? publicEnv.VITE_API_BASE_URL, command === 'serve' && !isPreview);
   return {
-    envPrefix: 'VITE_',
+    envPrefix: 'VITE_API_BASE_URL',
     build: { outDir: 'dist', sourcemap: false },
     plugins: [
       react(),
@@ -59,3 +59,4 @@ export default defineConfig(({ mode, command, isPreview }) => {
     },
   };
 });
+
