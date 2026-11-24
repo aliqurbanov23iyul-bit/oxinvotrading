@@ -1,0 +1,17 @@
+DEPLOYMENT.md
+NEON-INTEGRATION.md
+README.md
+backend/README.md
+backend/package.json
+backend/scripts/finalize-database-access.cjs
+backend/scripts/migrate.cjs
+backend/scripts/prepare-test-database.cjs
+backend/scripts/prisma-command.cjs
+backend/scripts/provision-neon.cjs
+backend/scripts/test-database.cjs
+package.json
+scripts/check-repository-secrets.cjs
+
+Ignored local configuration: backend/.env, backend/.env.test.local, backend/.env.neon-provision.local
+Generated/ignored evidence: .verification/stage4-*.json
+Schema, original migrations and frontend source unchanged.

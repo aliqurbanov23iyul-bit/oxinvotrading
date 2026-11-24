@@ -1,0 +1,63 @@
+{
+  "name": "@oxinvo/backend",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "predev": "npm run prisma:generate",
+    "dev": "tsc-watch --project tsconfig.build.json --onSuccess \"node dist/main.js\"",
+    "start": "node dist/main.js",
+    "bootstrap:admin": "node scripts/bootstrap-admin.cjs",
+    "start:production": "node --env-file=.env.production.local dist/main.js",
+    "prebuild": "npm run prisma:generate",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run prisma:generate",
+    "test": "tsc -p tsconfig.json --outDir .test-build && node --test .test-build/test/*.test.js",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "db:migrate": "node scripts/migrate.cjs",
+    "db:validate": "node scripts/validate-migrations.cjs",
+    "db:status": "node scripts/prisma-command.cjs migrate status",
+    "db:provision": "node scripts/provision-neon.cjs",
+    "db:test:prepare": "node scripts/prepare-test-database.cjs",
+    "test:database": "node scripts/test-database.cjs",
+    "test:auth": "node scripts/test-authentication.cjs",
+    "db:check": "node scripts/database-check.cjs",
+    "env:init": "node scripts/init-env.cjs",
+    "auth:status": "node scripts/auth-status.cjs"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.2.11",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.2.11",
+    "@nestjs/platform-express": "^11.2.11",
+    "@nestjs/swagger": "^11.0.0",
+    "@nestjs/throttler": "^6.4.0",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "argon2": "^0.44.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3",
+    "dotenv": "^17.2.3",
+    "helmet": "^8.1.0",
+    "pg": "^8.16.3",
+    "pino": "^10.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "overrides": {
+    "effect": "3.22.2"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.2.11",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.6",
+    "prisma": "7.10.1",
+    "tsc-watch": "^7.2.0",
+    "typescript": "~5.9.3"
+  }
+}

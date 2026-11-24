@@ -1,0 +1,1 @@
+export default function handler(req,res) { res.setHeader("Cache-Control","no-store"); res.status(503).json({code:"PREVIEW_API_DISABLED",message:"Frontend preview only. Authentication, database and trading are unavailable.",liveTradingEnabled:false}); }

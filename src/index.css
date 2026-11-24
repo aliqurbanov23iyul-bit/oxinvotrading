@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --ox-bg: #F4F7FC;
+  --ox-surface: #FFFFFF;
+  --ox-surface-muted: #F8FAFC;
+  --ox-primary: #2563EB;
+  --ox-primary-light: #60A5FA;
+  --ox-text: #0F172A;
+  --ox-text-secondary: #64748B;
+  --ox-border: #E2E8F0;
+  --ox-profit: #16A34A;
+  --ox-loss: #DC2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: #F4F7FC;
+  color: #0F172A;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Soft fintech card elevation */
+.ox-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px -8px rgba(15, 23, 42, 0.05);
+}
+
+.ox-card-hover {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.ox-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06), 0 14px 32px -12px rgba(15, 23, 42, 0.08);
+}
+
+/* Soft translucent glass surface for overlays/headers */
+.ox-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Fluid soft blue aura background for hero/AI stage */
+.ox-blue-stage {
+  background:
+    radial-gradient(62% 58% at 50% 44%, rgba(96, 165, 250, 0.22) 0%, rgba(37, 99, 235, 0.08) 48%, rgba(244, 247, 252, 0) 100%),
+    linear-gradient(155deg, #F8FBFF 0%, #EEF4FF 52%, #E5EEFE 100%);
+}
+
+/* Custom slim light scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+@keyframes ox-fluid-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(14px, -10px, 0) scale(1.04);
+  }
+}
+
+.ox-fluid-blob {
+  animation: ox-fluid-drift 12s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

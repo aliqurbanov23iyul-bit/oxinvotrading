@@ -1,0 +1,14 @@
+backend/
+.env*
+!.env.example
+node_modules/
+dist/
+.git/
+.aistudio/
+.verification/
+.vercel/
+*.log
+*.zip
+*.pem
+*.key
+coverage/
