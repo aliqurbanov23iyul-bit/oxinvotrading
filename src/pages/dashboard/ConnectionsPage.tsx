@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, Copy, Link2, RefreshCw, Send, ShieldCheck, Unlink } from 'lucide-react';
+import { Check, Copy, Link2, RefreshCw, Send, ShieldCheck, Unlink, Wallet } from 'lucide-react';
 import { BinanceConnectionState, TelegramConnectionState, TelegramNotificationPrefs } from '../../types';
 import { TranslationDictionary } from '../../i18n/translations';
 import { CustomTabs } from '../../components/ui/CustomTabs';
@@ -8,6 +8,8 @@ import { CustomPasswordInput } from '../../components/ui/CustomPasswordInput';
 import { CustomToggle } from '../../components/ui/CustomToggle';
 import { MagneticButton } from '../../components/ui/MagneticButton';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { CoinIcon } from '../../components/ui/CoinIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/ToastProvider';
 
 interface ConnectionsPageProps {
@@ -116,14 +118,14 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
             <section className="ox-card p-6 space-y-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
+                  <span className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-[#111C33] border border-[#BFDBFE]/60 dark:border-[#1E3A8A]/60 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center">
                     <Link2 className="w-5 h-5" />
                   </span>
                   <div>
-                    <h2 className="font-display font-semibold text-base text-[#0F172A]">
+                    <h2 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                       {t.connections.binanceTitle}
                     </h2>
-                    <p className="text-xs text-[#64748B]">
+                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] font-mono">
                       {binance.connected ? binance.maskedApiKey : t.connections.notConnected}
                     </p>
                   </div>
@@ -136,7 +138,7 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
 
               <form onSubmit={handleSave} className="space-y-4">
                 <div>
-                  <label htmlFor="bn-api-key" className="block text-xs font-medium text-[#475569] mb-1.5">
+                  <label htmlFor="bn-api-key" className="block text-xs font-medium text-[#475569] dark:text-[#94A3B8] mb-1.5">
                     {t.connections.apiKey}
                   </label>
                   <input
@@ -145,7 +147,7 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
                     value={apiKeyInput}
                     onChange={(e) => setApiKeyInput(e.target.value)}
                     placeholder={binance.connected ? binance.maskedApiKey : 'Enter Binance API Key'}
-                    className="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#2563EB]"
+                    className="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl bg-white dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942] text-[#0A1428] dark:text-[#F1F5F9] placeholder:text-[#94A3B8] dark:placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB]"
                   />
                 </div>
 
@@ -186,29 +188,40 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
             {/* Synced Spot Balances */}
             <section className="ox-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-base text-[#0F172A]">
+                <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                   {t.connections.spotBalances}
                 </h3>
-                <span className="text-xs text-[#64748B]">
+                <span className="text-xs font-mono text-[#64748B] dark:text-[#94A3B8]">
                   {t.connections.lastSync}: {binance.lastSyncAt}
                 </span>
               </div>
 
-              <div className="divide-y divide-[#F1F5F9]">
-                {binance.balances.map((b) => (
-                  <div key={b.asset} className="py-3 flex items-center justify-between text-sm">
-                    <span className="font-semibold text-[#0F172A]">{b.asset}</span>
-                    <div className="text-right font-mono tabular-nums">
-                      <span className="text-[#0F172A] font-medium">
-                        {b.free.toLocaleString('en-US', { maximumFractionDigits: 4 })}
-                      </span>
-                      <span className="text-xs text-[#64748B] ml-3">
-                        ${b.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
+              {binance.balances.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={<Wallet className="w-5 h-5" />}
+                  title={t.common.noData}
+                />
+              ) : (
+                <div className="divide-y divide-[#F1F5F9] dark:divide-[#16233B]">
+                  {binance.balances.map((b) => (
+                    <div key={b.asset} className="py-3 flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2.5">
+                        <CoinIcon symbol={b.asset} size={24} />
+                        <span className="font-semibold text-[#0A1428] dark:text-[#F1F5F9]">{b.asset}</span>
+                      </div>
+                      <div className="text-right font-mono tabular-nums">
+                        <span className="text-[#0A1428] dark:text-[#F1F5F9] font-medium">
+                          {b.free.toLocaleString('en-US', { maximumFractionDigits: 4 })}
+                        </span>
+                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8] ml-3">
+                          ${b.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
 
@@ -216,8 +229,8 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
           <div className="lg:col-span-5 space-y-6">
             <section className="ox-card p-6 space-y-4">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
-                <h3 className="font-display font-semibold text-base text-[#0F172A]">
+                <ShieldCheck className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA]" />
+                <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                   {t.connections.permissionsCheck}
                 </h3>
               </div>
@@ -230,9 +243,9 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
                 ].map((perm) => (
                   <div
                     key={perm.label}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]"
                   >
-                    <span className="text-[#334155] font-medium">{perm.label}</span>
+                    <span className="text-[#334155] dark:text-[#CBD5E1] font-medium">{perm.label}</span>
                     <StatusBadge
                       tone={perm.ok ? 'emerald' : 'slate'}
                       label={perm.ok ? t.statusLabels.active : t.connections.notConnected}
@@ -243,14 +256,14 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
             </section>
 
             <section className="ox-card p-6 space-y-3">
-              <h3 className="font-display font-semibold text-base text-[#0F172A]">
+              <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                 {t.connections.connectSteps}
               </h3>
-              <ol className="space-y-2.5 text-sm text-[#475569]">
+              <ol className="space-y-2.5 text-sm text-[#475569] dark:text-[#CBD5E1]">
                 {[t.connections.step1, t.connections.step2, t.connections.step3, t.connections.step4, t.connections.step5].map(
                   (step, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <span className="w-5 h-5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="w-5 h-5 rounded-full bg-[#EFF6FF] dark:bg-[#111C33] border border-[#BFDBFE]/60 dark:border-[#1E3A8A]/60 text-[#2563EB] dark:text-[#60A5FA] text-xs font-mono font-semibold flex items-center justify-center shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
                       <span>{step}</span>
@@ -268,10 +281,10 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
             <section className="ox-card p-6 space-y-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-display font-semibold text-base text-[#0F172A]">
+                  <h2 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                     {t.connections.telegramTitle}
                   </h2>
-                  <p className="text-xs text-[#64748B] mt-0.5">{telegram.botUsername}</p>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">{telegram.botUsername}</p>
                 </div>
                 <StatusBadge
                   tone={telegram.connected ? 'emerald' : 'slate'}
@@ -279,35 +292,35 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-2">
-                <div className="flex items-center justify-between text-xs text-[#64748B]">
+              <div className="p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942] space-y-2">
+                <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
                   <span>{t.connections.yourHandle}</span>
-                  <span className="font-mono font-semibold text-[#0F172A]">
+                  <span className="font-mono font-semibold text-[#0A1428] dark:text-[#F1F5F9]">
                     {telegram.connected ? telegram.handle : '—'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-[#64748B]">
+                <div className="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
                   <span>{t.connections.telegramBot}</span>
-                  <span className="font-mono text-[#2563EB]">{telegram.botUsername}</span>
+                  <span className="font-mono text-[#2563EB] dark:text-[#60A5FA]">{telegram.botUsername}</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] space-y-3">
+              <div className="p-4 rounded-xl bg-[#EFF6FF] dark:bg-[#111C33] border border-[#BFDBFE] dark:border-[#1E3A8A] space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-[#1E40AF]">{t.connections.linkCode}</span>
-                  <span className="font-mono text-[#2563EB]">
+                  <span className="font-medium text-[#1E40AF] dark:text-[#93C5FD]">{t.connections.linkCode}</span>
+                  <span className="font-mono text-[#2563EB] dark:text-[#60A5FA]">
                     {t.connections.expiresIn} {mins}:{secs}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <code className="font-mono font-bold text-base text-[#0F172A] tracking-wider">
-                    {telegram.connectionCode}
+                  <code className="font-mono font-bold text-base text-[#0A1428] dark:text-[#F1F5F9] tracking-wider">
+                    {telegram.connectionCode || '—'}
                   </code>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={copyCode}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#BFDBFE] text-xs font-medium text-[#2563EB] hover:bg-[#DBEAFE]/40"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#070D19] border border-[#BFDBFE] dark:border-[#1E3A8A] text-xs font-medium text-[#2563EB] dark:text-[#60A5FA] hover:bg-[#DBEAFE]/40"
                     >
                       {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{t.connections.copyCode}</span>
@@ -316,7 +329,7 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
                       type="button"
                       onClick={onRegenerateTelegramCode}
                       aria-label={t.connections.newCode}
-                      className="p-1.5 rounded-lg bg-white border border-[#BFDBFE] text-[#2563EB] hover:bg-[#DBEAFE]/40"
+                      className="p-1.5 rounded-lg bg-white dark:bg-[#070D19] border border-[#BFDBFE] dark:border-[#1E3A8A] text-[#2563EB] dark:text-[#60A5FA] hover:bg-[#DBEAFE]/40"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                     </button>
@@ -339,14 +352,14 @@ export const ConnectionsPage: React.FC<ConnectionsPageProps> = ({
           {/* Right: 10 Alert Toggles */}
           <div className="lg:col-span-7">
             <section className="ox-card p-6">
-              <h3 className="font-display font-semibold text-base text-[#0F172A] mb-4">
+              <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9] mb-4">
                 {t.connections.alertsTitle}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {alertKeys.map((key) => (
                   <div
                     key={key}
-                    className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between"
+                    className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942] flex items-center justify-between"
                   >
                     <CustomToggle
                       checked={telegram.prefs[key]}

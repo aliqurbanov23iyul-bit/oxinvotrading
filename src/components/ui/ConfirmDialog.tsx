@@ -36,21 +36,21 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <div
           className={`p-2.5 rounded-xl shrink-0 ${
             variant === 'danger'
-              ? 'bg-[#FEF2F2] text-[#DC2626]'
+              ? 'bg-[#FEF2F2] dark:bg-[#7F1D1D]/40 text-[#DC2626] dark:text-[#F87171]'
               : variant === 'warning'
-              ? 'bg-[#FFFBEB] text-[#D97706]'
-              : 'bg-[#EFF6FF] text-[#2563EB]'
+              ? 'bg-[#FFFBEB] dark:bg-[#78350F]/40 text-[#D97706] dark:text-[#FBBF24]'
+              : 'bg-[#EFF6FF] dark:bg-[#1E3A8A]/40 text-[#2563EB] dark:text-[#60A5FA]'
           }`}
         >
           <AlertTriangle className="w-5 h-5" />
         </div>
-        <p className="text-sm text-[#475569] leading-relaxed">{description}</p>
+        <p className="text-sm text-[#475569] dark:text-[#94A3B8] leading-relaxed">{description}</p>
       </div>
       <div className="mt-6 flex items-center justify-end gap-3">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-sm font-medium rounded-xl border border-[#E2E8F0] text-[#475569] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors whitespace-nowrap shrink-0"
+          className="px-4 py-2 text-sm font-medium rounded-xl border border-[#E2E8F0] dark:border-[#1B2942] text-[#475569] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white hover:bg-[#F8FAFC] dark:hover:bg-[#111C33] transition-colors whitespace-nowrap shrink-0"
         >
           {cancelLabel}
         </button>

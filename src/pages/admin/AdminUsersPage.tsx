@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CustomPagination } from '../../components/ui/CustomPagination';
-import { Eye, KeyRound, PauseCircle, PlayCircle, Plus, Trash2 } from 'lucide-react';
+import { Eye, KeyRound, PauseCircle, PlayCircle, Plus, Trash2, Users } from 'lucide-react';
 import { SubscriptionPlan, UserAccount, UserStatus } from '../../types';
 import { TranslationDictionary, translatePlan, translateUserStatus } from '../../i18n/translations';
 import { CustomSearchInput } from '../../components/ui/CustomSearchInput';
@@ -8,7 +7,9 @@ import { CustomSelect } from '../../components/ui/CustomSelect';
 import { MagneticButton } from '../../components/ui/MagneticButton';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { CustomContextMenu } from '../../components/ui/CustomContextMenu';
+import { CustomPagination } from '../../components/ui/CustomPagination';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface AdminUsersPageProps {
   t: TranslationDictionary;
@@ -32,13 +33,23 @@ export const AdminUsersPage: React.FC<AdminUsersPageProps> = ({
   onToggleSuspend,
   onResetPassword,
   onDeleteUser,
-  onQueryChange, page = 1, total = 0, onPageChange,
+  onQueryChange,
+  page = 1,
+  total = 0,
+  onPageChange,
 }) => {
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState<'ALL' | SubscriptionPlan>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | UserStatus>('ALL');
   const [deleteTarget, setDeleteTarget] = useState<UserAccount | null>(null);
-  useEffect(() => { onQueryChange?.({ search, plan: planFilter === 'ALL' ? '' : planFilter, status: statusFilter === 'ALL' ? '' : statusFilter.toUpperCase() }); }, [search, planFilter, statusFilter, onQueryChange]);
+
+  useEffect(() => {
+    onQueryChange?.({
+      search,
+      plan: planFilter === 'ALL' ? '' : planFilter,
+      status: statusFilter === 'ALL' ? '' : statusFilter.toUpperCase(),
+    });
+  }, [search, planFilter, statusFilter, onQueryChange]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -90,101 +101,107 @@ export const AdminUsersPage: React.FC<AdminUsersPageProps> = ({
       </div>
 
       <section className="ox-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
-                <th className="py-3.5 px-5">{t.admin.user}</th>
-                <th className="py-3.5 px-4">{t.admin.plan}</th>
-                <th className="py-3.5 px-4">{t.admin.status}</th>
-                <th className="py-3.5 px-4 hidden md:table-cell">{t.admin.expires}</th>
-                <th className="py-3.5 px-4 text-right hidden sm:table-cell">{t.admin.balance}</th>
-                <th className="py-3.5 px-4 text-right">{t.admin.pnl}</th>
-                <th className="py-3.5 px-5 text-right">{t.admin.actions}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F1F5F9] text-sm">
-              {filtered.map((user) => {
-                const statusTone =
-                  user.status === 'active'
-                    ? 'emerald'
-                    : user.status === 'suspended'
-                    ? 'amber'
-                    : 'red';
-                const pos = user.realizedPnl >= 0;
-                return (
-                  <tr
-                    key={user.id}
-                    onClick={() => onSelectUser(user)}
-                    className="hover:bg-[#F8FAFC] cursor-pointer transition-colors"
-                  >
-                    <td className="py-3.5 px-5">
-                      <p className="font-semibold text-[#0F172A]">{user.fullName}</p>
-                      <p className="text-xs text-[#64748B] font-mono">@{user.username}</p>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-medium text-[#2563EB]">
-                      {translatePlan(user.plan, t)}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <StatusBadge tone={statusTone} label={translateUserStatus(user.status, t)} />
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-[#64748B] hidden md:table-cell">
-                      {user.expiresAt}
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#0F172A] hidden sm:table-cell">
-                      ${user.portfolioBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </td>
-                    <td
-                      className={`py-3.5 px-4 text-right font-mono tabular-nums font-semibold ${
-                        pos ? 'text-[#16A34A]' : 'text-[#DC2626]'
-                      }`}
+        {filtered.length === 0 ? (
+          <div className="p-6">
+            <EmptyState icon={<Users className="w-5 h-5" />} title={t.common.noData} />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#E2E8F0] dark:border-[#1B2942] bg-[#F8FAFC] dark:bg-[#070D19] text-[11px] font-semibold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
+                  <th className="py-3.5 px-5">{t.admin.user}</th>
+                  <th className="py-3.5 px-4">{t.admin.plan}</th>
+                  <th className="py-3.5 px-4">{t.admin.status}</th>
+                  <th className="py-3.5 px-4 hidden md:table-cell">{t.admin.expires}</th>
+                  <th className="py-3.5 px-4 text-right hidden sm:table-cell">{t.admin.balance}</th>
+                  <th className="py-3.5 px-4 text-right">{t.admin.pnl}</th>
+                  <th className="py-3.5 px-5 text-right">{t.admin.actions}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F1F5F9] dark:divide-[#16233B] text-sm">
+                {filtered.map((user) => {
+                  const statusTone =
+                    user.status === 'active'
+                      ? 'emerald'
+                      : user.status === 'suspended'
+                      ? 'amber'
+                      : 'red';
+                  const pos = user.realizedPnl >= 0;
+                  return (
+                    <tr
+                      key={user.id}
+                      onClick={() => onSelectUser(user)}
+                      className="hover:bg-[#F8FAFC] dark:hover:bg-[#0D1629] cursor-pointer transition-colors"
                     >
-                      {pos ? '+' : '-'}${Math.abs(user.realizedPnl).toFixed(2)}
-                    </td>
-                    <td className="py-3.5 px-5 text-right">
-                      <CustomContextMenu
-                        ariaLabel={t.admin.actions}
-                        items={[
-                          {
-                            id: 'view',
-                            label: t.admin.viewUser,
-                            icon: <Eye className="w-3.5 h-3.5" />,
-                            onClick: () => onSelectUser(user),
-                          },
-                          {
-                            id: 'reset',
-                            label: t.admin.resetPassword,
-                            icon: <KeyRound className="w-3.5 h-3.5" />,
-                            onClick: () => onResetPassword(user.id),
-                          },
-                          {
-                            id: 'toggle',
-                            label:
-                              user.status === 'suspended' ? t.admin.activate : t.admin.suspend,
-                            icon:
-                              user.status === 'suspended' ? (
-                                <PlayCircle className="w-3.5 h-3.5" />
-                              ) : (
-                                <PauseCircle className="w-3.5 h-3.5" />
-                              ),
-                            onClick: () => onToggleSuspend(user.id),
-                          },
-                          {
-                            id: 'delete',
-                            label: t.admin.delete,
-                            icon: <Trash2 className="w-3.5 h-3.5" />,
-                            danger: true,
-                            onClick: () => setDeleteTarget(user),
-                          },
-                        ]}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <td className="py-3.5 px-5">
+                        <p className="font-semibold text-[#0A1428] dark:text-[#F1F5F9]">{user.fullName}</p>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] font-mono">@{user.username}</p>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs font-medium text-[#2563EB] dark:text-[#60A5FA]">
+                        {translatePlan(user.plan, t)}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <StatusBadge tone={statusTone} label={translateUserStatus(user.status, t)} />
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-[#64748B] dark:text-[#94A3B8] hidden md:table-cell">
+                        {user.expiresAt}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#0A1428] dark:text-[#F1F5F9] hidden sm:table-cell">
+                        ${user.portfolioBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td
+                        className={`py-3.5 px-4 text-right font-mono tabular-nums font-semibold ${
+                          pos ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
+                        }`}
+                      >
+                        {pos ? '+' : '-'}${Math.abs(user.realizedPnl).toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-5 text-right">
+                        <CustomContextMenu
+                          ariaLabel={t.admin.actions}
+                          items={[
+                            {
+                              id: 'view',
+                              label: t.admin.viewUser,
+                              icon: <Eye className="w-3.5 h-3.5" />,
+                              onClick: () => onSelectUser(user),
+                            },
+                            {
+                              id: 'reset',
+                              label: t.admin.resetPassword,
+                              icon: <KeyRound className="w-3.5 h-3.5" />,
+                              onClick: () => onResetPassword(user.id),
+                            },
+                            {
+                              id: 'toggle',
+                              label:
+                                user.status === 'suspended' ? t.admin.activate : t.admin.suspend,
+                              icon:
+                                user.status === 'suspended' ? (
+                                  <PlayCircle className="w-3.5 h-3.5" />
+                                ) : (
+                                  <PauseCircle className="w-3.5 h-3.5" />
+                                ),
+                              onClick: () => onToggleSuspend(user.id),
+                            },
+                            {
+                              id: 'delete',
+                              label: t.admin.delete,
+                              icon: <Trash2 className="w-3.5 h-3.5" />,
+                              danger: true,
+                              onClick: () => setDeleteTarget(user),
+                            },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <ConfirmDialog
@@ -198,7 +215,13 @@ export const AdminUsersPage: React.FC<AdminUsersPageProps> = ({
         confirmLabel={t.admin.delete}
         cancelLabel={t.common.cancel}
       />
-      {onPageChange && <CustomPagination page={page} totalPages={Math.max(1, Math.ceil(total / 10))} onPageChange={onPageChange} />}
+      {onPageChange && (
+        <CustomPagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(total / 10))}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   );
 };

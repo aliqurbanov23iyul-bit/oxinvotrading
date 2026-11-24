@@ -54,28 +54,28 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.96 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl bg-white border border-[#E2E8F0] shadow-[0_14px_36px_rgba(15,23,42,0.12)]"
+              className="pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl bg-white dark:bg-[#0B1324] border border-[#E2E8F0] dark:border-[#1B2942] shadow-[0_14px_36px_rgba(10,20,40,0.14)] dark:shadow-[0_18px_48px_rgba(0,0,0,0.65)]"
             >
               {toast.variant === 'success' && (
-                <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-[#059669] dark:text-[#34D399] shrink-0 mt-0.5" />
               )}
               {toast.variant === 'error' && (
-                <AlertCircle className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-[#DC2626] dark:text-[#F87171] shrink-0 mt-0.5" />
               )}
               {toast.variant === 'info' && (
-                <Info className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA] shrink-0 mt-0.5" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#0F172A]">{toast.title}</p>
+                <p className="text-sm font-medium text-[#0A1428] dark:text-[#F1F5F9]">{toast.title}</p>
                 {toast.description && (
-                  <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">{toast.description}</p>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5 leading-relaxed">{toast.description}</p>
                 )}
               </div>
               <button
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => dismiss(toast.id)}
-                className="p-1 rounded-md text-[#94A3B8] hover:text-[#0F172A] transition-colors"
+                className="p-1 rounded-md text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

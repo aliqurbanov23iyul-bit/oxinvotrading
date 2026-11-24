@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -7,16 +9,41 @@
 }
 
 :root {
-  --ox-bg: #F4F7FC;
+  --ox-bg: #F6F8FC;
   --ox-surface: #FFFFFF;
-  --ox-surface-muted: #F8FAFC;
+  --ox-surface-muted: #F1F5F9;
+  --ox-surface-elevated: #FFFFFF;
   --ox-primary: #2563EB;
-  --ox-primary-light: #60A5FA;
-  --ox-text: #0F172A;
-  --ox-text-secondary: #64748B;
+  --ox-primary-hover: #1D4ED8;
+  --ox-primary-light: #3B82F6;
+  --ox-navy: #070D19;
+  --ox-silver: #CBD5E1;
+  --ox-text: #0A1428;
+  --ox-text-secondary: #475569;
+  --ox-text-muted: #64748B;
   --ox-border: #E2E8F0;
-  --ox-profit: #16A34A;
+  --ox-border-strong: #CBD5E1;
+  --ox-profit: #059669;
   --ox-loss: #DC2626;
+}
+
+.dark {
+  --ox-bg: #060B16;
+  --ox-surface: #0B1324;
+  --ox-surface-muted: #111C33;
+  --ox-surface-elevated: #101A30;
+  --ox-primary: #3B82F6;
+  --ox-primary-hover: #2563EB;
+  --ox-primary-light: #60A5FA;
+  --ox-navy: #040812;
+  --ox-silver: #94A3B8;
+  --ox-text: #F1F5F9;
+  --ox-text-secondary: #94A3B8;
+  --ox-text-muted: #64748B;
+  --ox-border: #1B2942;
+  --ox-border-strong: #273A5C;
+  --ox-profit: #10B981;
+  --ox-loss: #EF4444;
 }
 
 * {
@@ -25,8 +52,8 @@
 
 html,
 body {
-  background-color: #F4F7FC;
-  color: #0F172A;
+  background-color: var(--ox-bg);
+  color: var(--ox-text);
   font-family: var(--font-sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -45,39 +72,114 @@ h4,
   font-variant-numeric: tabular-nums;
 }
 
-/* Soft fintech card elevation */
+/* Institutional fintech card elevation */
 .ox-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 1.25rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px -8px rgba(15, 23, 42, 0.05);
+  background-color: var(--ox-surface);
+  border: 1px solid var(--ox-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(10, 20, 40, 0.04), 0 8px 24px -10px rgba(10, 20, 40, 0.06);
+}
+
+.dark .ox-card {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.55);
 }
 
 .ox-card-hover {
-  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease, border-color 200ms ease;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .ox-card-hover:hover {
   transform: translateY(-2px);
-  border-color: #CBD5E1;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06), 0 14px 32px -12px rgba(15, 23, 42, 0.08);
+  border-color: var(--ox-border-strong);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.08), 0 14px 32px -12px rgba(10, 20, 40, 0.1);
 }
 
-/* Soft translucent glass surface for overlays/headers */
+.dark .ox-card-hover:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 36px -12px rgba(37, 99, 235, 0.22);
+}
+
+/* Translucent glass navigation surfaces */
 .ox-glass {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Fluid soft blue aura background for hero/AI stage */
-.ox-blue-stage {
-  background:
-    radial-gradient(62% 58% at 50% 44%, rgba(96, 165, 250, 0.22) 0%, rgba(37, 99, 235, 0.08) 48%, rgba(244, 247, 252, 0) 100%),
-    linear-gradient(155deg, #F8FBFF 0%, #EEF4FF 52%, #E5EEFE 100%);
+.dark .ox-glass {
+  background: rgba(6, 11, 22, 0.86);
 }
 
-/* Custom slim light scrollbars */
+/* Deep navy terminal showcase stage (Login right panel & About hero visual) */
+.ox-terminal-stage {
+  background:
+    radial-gradient(64% 58% at 72% 28%, rgba(37, 99, 235, 0.24) 0%, rgba(15, 34, 74, 0.14) 50%, rgba(7, 13, 25, 0) 100%),
+    radial-gradient(50% 45% at 20% 82%, rgba(59, 130, 246, 0.14) 0%, rgba(7, 13, 25, 0) 100%),
+    linear-gradient(155deg, #060C18 0%, #0A1429 52%, #0D1B38 100%);
+}
+
+/* Crisp terminal grid overlay */
+.ox-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.ox-light-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.dark .ox-light-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(96, 165, 250, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.06) 1px, transparent 1px);
+}
+
+/* Shimmer skeleton effect */
+@keyframes ox-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.ox-shimmer {
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.55) 25%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.55) 75%);
+  background-size: 200% 100%;
+  animation: ox-shimmer 1.8s ease-in-out infinite;
+}
+
+.dark .ox-shimmer {
+  background: linear-gradient(90deg, rgba(27, 41, 66, 0.55) 25%, rgba(39, 58, 92, 0.9) 50%, rgba(27, 41, 66, 0.55) 75%);
+  background-size: 200% 100%;
+}
+
+/* Subtle metallic glow pulse for terminal data lines */
+@keyframes ox-data-flow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20%, 80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.ox-data-stream {
+  animation: ox-data-flow 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Custom slim dual-theme scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -92,22 +194,16 @@ h4,
   border-radius: 9999px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #273A5C;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
-@keyframes ox-fluid-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(14px, -10px, 0) scale(1.04);
-  }
-}
-
-.ox-fluid-blob {
-  animation: ox-fluid-drift 12s ease-in-out infinite;
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
 }
 
 @media (prefers-reduced-motion: reduce) {

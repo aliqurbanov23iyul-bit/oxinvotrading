@@ -26,8 +26,8 @@ export const CustomPagination: React.FC<CustomPaginationProps> = ({
   );
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#E2E8F0]">
-      <span className="text-xs text-[#64748B] font-mono tabular-nums">
+    <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#E2E8F0] dark:border-[#1B2942]">
+      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] font-mono tabular-nums">
         {pageLabel} {page} {ofLabel} {totalPages}
         {typeof totalItems === 'number' ? ` · ${totalItems}` : ''}
       </span>
@@ -37,7 +37,7 @@ export const CustomPagination: React.FC<CustomPaginationProps> = ({
           disabled={page <= 1}
           aria-label="Previous"
           onClick={() => onPageChange(page - 1)}
-          className="p-2 rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] hover:border-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#1B2942] bg-white dark:bg-[#0B1324] text-[#64748B] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white hover:border-[#CBD5E1] dark:hover:border-[#273A5C] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -49,7 +49,7 @@ export const CustomPagination: React.FC<CustomPaginationProps> = ({
             className={`min-w-8 h-8 px-2 rounded-lg text-xs font-mono tabular-nums transition-colors ${
               p === page
                 ? 'bg-[#2563EB] text-white font-semibold'
-                : 'border border-[#E2E8F0] bg-white text-[#475569] hover:text-[#0F172A]'
+                : 'border border-[#E2E8F0] dark:border-[#1B2942] bg-white dark:bg-[#0B1324] text-[#475569] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white'
             }`}
           >
             {p}
@@ -60,7 +60,7 @@ export const CustomPagination: React.FC<CustomPaginationProps> = ({
           disabled={page >= totalPages}
           aria-label="Next"
           onClick={() => onPageChange(page + 1)}
-          className="p-2 rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0F172A] hover:border-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#1B2942] bg-white dark:bg-[#0B1324] text-[#64748B] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white hover:border-[#CBD5E1] dark:hover:border-[#273A5C] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

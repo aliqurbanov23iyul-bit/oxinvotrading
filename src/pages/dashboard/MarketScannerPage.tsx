@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Globe } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { MarketAsset, MarketCategoryKey } from '../../types';
 import { TranslationDictionary, translateDecision } from '../../i18n/translations';
@@ -6,6 +7,8 @@ import { CustomSearchInput } from '../../components/ui/CustomSearchInput';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { CustomModal } from '../../components/ui/CustomModal';
 import { CustomPagination } from '../../components/ui/CustomPagination';
+import { CoinIcon } from '../../components/ui/CoinIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface MarketScannerPageProps {
   t: TranslationDictionary;
@@ -79,7 +82,7 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                   active
                     ? 'bg-[#2563EB] text-white font-semibold'
-                    : 'bg-[#F1F5F9] text-[#475569] hover:text-[#0F172A] hover:bg-[#E2E8F0]'
+                    : 'bg-[#F1F5F9] dark:bg-[#070D19] text-[#475569] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-white hover:bg-[#E2E8F0] dark:hover:bg-[#111C33]'
                 }`}
               >
                 {cat.label}
@@ -92,13 +95,19 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
       {/* Market Table */}
       <section className="ox-card overflow-hidden">
         {rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-[#64748B]">{t.markets.empty}</div>
+          <div className="p-6">
+            <EmptyState
+              icon={<Globe className="w-5 h-5" />}
+              title={t.common.noData}
+              description={t.markets.empty}
+            />
+          </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                  <tr className="border-b border-[#E2E8F0] dark:border-[#1B2942] bg-[#F8FAFC] dark:bg-[#070D19] text-[11px] font-semibold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
                     <th className="py-3.5 px-5">{t.markets.asset}</th>
                     <th className="py-3.5 px-4 text-right">{t.markets.price}</th>
                     <th className="py-3.5 px-4 text-right">{t.markets.change24h}</th>
@@ -108,7 +117,7 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
                     <th className="py-3.5 px-5 text-right">{t.markets.signal}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F1F5F9] text-sm">
+                <tbody className="divide-y divide-[#F1F5F9] dark:divide-[#16233B] text-sm">
                   {rows.map((asset) => {
                     const pos24 = asset.change24h >= 0;
                     const sparkData = asset.sparkline.map((v, i) => ({ i, v }));
@@ -118,24 +127,29 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
                       <tr
                         key={asset.symbol}
                         onClick={() => setSelectedAsset(asset)}
-                        className="hover:bg-[#F8FAFC] cursor-pointer transition-colors"
+                        className="hover:bg-[#F8FAFC] dark:hover:bg-[#0D1629] cursor-pointer transition-colors"
                       >
                         <td className="py-3.5 px-5">
-                          <p className="font-semibold text-[#0F172A]">{asset.symbol}</p>
-                          <p className="text-xs text-[#64748B]">{asset.name}</p>
+                          <div className="flex items-center gap-3">
+                            <CoinIcon symbol={asset.symbol} size={28} />
+                            <div>
+                              <p className="font-semibold text-[#0A1428] dark:text-[#F1F5F9]">{asset.symbol}</p>
+                              <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{asset.name}</p>
+                            </div>
+                          </div>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono tabular-nums font-medium text-[#0F172A]">
+                        <td className="py-3.5 px-4 text-right font-mono tabular-nums font-medium text-[#0A1428] dark:text-[#F1F5F9]">
                           ${asset.price.toLocaleString('en-US', { maximumFractionDigits: 4 })}
                         </td>
                         <td
                           className={`py-3.5 px-4 text-right font-mono tabular-nums font-semibold ${
-                            pos24 ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                            pos24 ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
                           }`}
                         >
                           {pos24 ? '+' : ''}
                           {asset.change24h.toFixed(2)}%
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#475569] hidden md:table-cell">
+                        <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#475569] dark:text-[#CBD5E1] hidden md:table-cell">
                           ${(asset.volume24hUsd / 1_000_000).toFixed(1)}M
                         </td>
                         <td className="py-3.5 px-4 hidden sm:table-cell">
@@ -154,7 +168,7 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
                             </ResponsiveContainer>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono tabular-nums font-semibold text-[#2563EB]">
+                        <td className="py-3.5 px-4 text-right font-mono tabular-nums font-semibold text-[#2563EB] dark:text-[#60A5FA]">
                           {asset.opportunityScore}
                         </td>
                         <td className="py-3.5 px-5 text-right">
@@ -188,12 +202,15 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
       >
         {selectedAsset && (
           <div className="space-y-5">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-              <div>
-                <p className="text-xs text-[#64748B]">{t.markets.price}</p>
-                <p className="text-2xl font-display font-bold font-mono text-[#0F172A] mt-0.5">
-                  ${selectedAsset.price.toLocaleString('en-US', { maximumFractionDigits: 4 })}
-                </p>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+              <div className="flex items-center gap-3">
+                <CoinIcon symbol={selectedAsset.symbol} size={34} />
+                <div>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{t.markets.price}</p>
+                  <p className="text-2xl font-display font-bold font-mono text-[#0A1428] dark:text-[#F1F5F9] mt-0.5">
+                    ${selectedAsset.price.toLocaleString('en-US', { maximumFractionDigits: 4 })}
+                  </p>
+                </div>
               </div>
               <StatusBadge
                 tone={
@@ -208,23 +225,25 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-                <p className="text-[11px] text-[#64748B]">{t.markets.liquidity}</p>
-                <p className="font-mono font-semibold text-sm text-[#0F172A] mt-1">
+              <div className="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+                <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{t.markets.liquidity}</p>
+                <p className="font-mono font-semibold text-sm text-[#0A1428] dark:text-[#F1F5F9] mt-1">
                   {selectedAsset.liquidityScore}/100
                 </p>
               </div>
-              <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-                <p className="text-[11px] text-[#64748B]">{t.markets.momentum}</p>
-                <p className="font-mono font-semibold text-sm text-[#2563EB] mt-1">
+              <div className="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+                <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{t.markets.momentum}</p>
+                <p className="font-mono font-semibold text-sm text-[#2563EB] dark:text-[#60A5FA] mt-1">
                   {selectedAsset.momentumScore}/100
                 </p>
               </div>
-              <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-                <p className="text-[11px] text-[#64748B]">{t.markets.imbalance}</p>
+              <div className="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+                <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{t.markets.imbalance}</p>
                 <p
                   className={`font-mono font-semibold text-sm mt-1 ${
-                    selectedAsset.orderBookImbalance >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                    selectedAsset.orderBookImbalance >= 0
+                      ? 'text-[#059669] dark:text-[#34D399]'
+                      : 'text-[#DC2626] dark:text-[#F87171]'
                   }`}
                 >
                   {selectedAsset.orderBookImbalance >= 0 ? '+' : ''}
@@ -234,9 +253,9 @@ export const MarketScannerPage: React.FC<MarketScannerPageProps> = ({ t, assets 
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-[#64748B]">{t.markets.aiSummary}</p>
-              <p className="text-sm text-[#334155] leading-relaxed">{selectedAsset.aiReasoning}</p>
-              <p className="text-xs text-[#64748B] pt-1">{selectedAsset.riskNote}</p>
+              <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">{t.markets.aiSummary}</p>
+              <p className="text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed">{selectedAsset.aiReasoning}</p>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] pt-1">{selectedAsset.riskNote}</p>
             </div>
           </div>
         )}

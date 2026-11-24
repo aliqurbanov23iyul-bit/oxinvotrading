@@ -50,7 +50,7 @@ export function CustomSelect<T extends string = string>({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      {label && <span className="block text-xs font-medium text-[#64748B] mb-1.5">{label}</span>}
+      {label && <span className="block text-xs font-medium text-[#64748B] dark:text-[#94A3B8] mb-1.5">{label}</span>}
       <button
         type="button"
         disabled={disabled}
@@ -59,16 +59,16 @@ export function CustomSelect<T extends string = string>({
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/35 ${
           disabled
-            ? 'bg-[#F8FAFC] border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
+            ? 'bg-[#F8FAFC] dark:bg-[#070D19] border-[#E2E8F0] dark:border-[#1B2942] text-[#94A3B8] cursor-not-allowed'
             : open
-            ? 'bg-white border-[#2563EB] text-[#0F172A] shadow-xs'
-            : 'bg-white border-[#E2E8F0] text-[#0F172A] hover:border-[#CBD5E1]'
+            ? 'bg-white dark:bg-[#070D19] border-[#2563EB] dark:border-[#3B82F6] text-[#0A1428] dark:text-[#F1F5F9] shadow-xs'
+            : 'bg-white dark:bg-[#070D19] border-[#E2E8F0] dark:border-[#1B2942] text-[#0A1428] dark:text-[#F1F5F9] hover:border-[#CBD5E1] dark:hover:border-[#273A5C]'
         }`}
       >
         <span className="truncate">{selected ? selected.label : placeholder}</span>
         <ChevronDown
-          className={`w-4 h-4 text-[#64748B] shrink-0 transition-transform duration-150 ${
-            open ? 'rotate-180 text-[#2563EB]' : ''
+          className={`w-4 h-4 text-[#64748B] dark:text-[#94A3B8] shrink-0 transition-transform duration-150 ${
+            open ? 'rotate-180 text-[#2563EB] dark:text-[#60A5FA]' : ''
           }`}
         />
       </button>
@@ -76,7 +76,7 @@ export function CustomSelect<T extends string = string>({
       {open && (
         <div
           role="listbox"
-          className="absolute z-50 mt-1.5 w-full min-w-[180px] max-h-60 overflow-y-auto rounded-xl bg-white border border-[#E2E8F0] shadow-[0_12px_32px_rgba(15,23,42,0.12)] py-1"
+          className="absolute z-50 mt-1.5 w-full min-w-[180px] max-h-60 overflow-y-auto rounded-xl bg-white dark:bg-[#0B1324] border border-[#E2E8F0] dark:border-[#1B2942] shadow-[0_12px_32px_rgba(10,20,40,0.14)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.65)] py-1"
         >
           {options.map((opt) => {
             const isSelected = opt.value === value;
@@ -92,15 +92,15 @@ export function CustomSelect<T extends string = string>({
                 }}
                 className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors ${
                   isSelected
-                    ? 'bg-[#EFF6FF] text-[#2563EB] font-medium'
-                    : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+                    ? 'bg-[#EFF6FF] dark:bg-[#1E3A8A]/35 text-[#2563EB] dark:text-[#60A5FA] font-medium'
+                    : 'text-[#334155] dark:text-[#CBD5E1] hover:bg-[#F8FAFC] dark:hover:bg-[#111C33] hover:text-[#0A1428] dark:hover:text-white'
                 }`}
               >
                 <span className="flex flex-col truncate">
                   <span className="truncate">{opt.label}</span>
-                  {opt.hint && <span className="text-[11px] text-[#64748B] truncate">{opt.hint}</span>}
+                  {opt.hint && <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8] truncate">{opt.hint}</span>}
                 </span>
-                {isSelected && <Check className="w-4 h-4 text-[#2563EB] shrink-0" />}
+                {isSelected && <Check className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA] shrink-0" />}
               </button>
             );
           })}

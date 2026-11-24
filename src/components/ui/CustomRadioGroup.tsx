@@ -38,20 +38,20 @@ export function CustomRadioGroup<T extends string = string>({
             onClick={() => onChange(opt.value)}
             className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/45 ${
               active
-                ? 'bg-[#EFF6FF] border-[#2563EB] text-[#0F172A]'
-                : 'bg-white border-[#E2E8F0] text-[#475569] hover:border-[#CBD5E1]'
+                ? 'bg-[#EFF6FF] dark:bg-[#1E3A8A]/25 border-[#2563EB] dark:border-[#3B82F6] text-[#0A1428] dark:text-[#F1F5F9]'
+                : 'bg-white dark:bg-[#070D19] border-[#E2E8F0] dark:border-[#1B2942] text-[#475569] dark:text-[#94A3B8] hover:border-[#CBD5E1] dark:hover:border-[#273A5C]'
             }`}
           >
             <span
               className={`mt-0.5 flex items-center justify-center w-4 h-4 rounded-full border shrink-0 transition-colors ${
-                active ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
+                active ? 'border-[#2563EB] dark:border-[#60A5FA]' : 'border-[#CBD5E1] dark:border-[#273A5C]'
               }`}
             >
-              {active && <span className="w-2 h-2 rounded-full bg-[#2563EB]" />}
+              {active && <span className="w-2 h-2 rounded-full bg-[#2563EB] dark:bg-[#60A5FA]" />}
             </span>
             <span className="flex flex-col">
-              <span className="text-sm font-medium text-[#0F172A]">{opt.label}</span>
-              {opt.description && <span className="text-xs text-[#64748B] mt-0.5">{opt.description}</span>}
+              <span className="text-sm font-medium text-[#0A1428] dark:text-[#F1F5F9]">{opt.label}</span>
+              {opt.description && <span className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">{opt.description}</span>}
             </span>
           </button>
         );

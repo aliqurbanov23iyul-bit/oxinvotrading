@@ -31,19 +31,25 @@ export type MarketCategoryKey =
 
 export type ScannerCategory = MarketCategoryKey;
 
+export type PublicRoute = 'login' | 'about' | 'contact' | 'privacy' | 'terms' | 'risk';
+
 export type UserRoute =
   | 'overview'
   | 'ai-engine'
   | 'scanner'
+  | 'ai-analysis'
   | 'trades'
   | 'live-trades'
   | 'trade-history'
   | 'portfolio'
   | 'analytics'
+  | 'risk'
   | 'connections'
   | 'binance'
   | 'telegram'
+  | 'affiliate'
   | 'notifications'
+  | 'support'
   | 'settings'
   | 'help';
 
@@ -54,13 +60,49 @@ export type AdminRoute =
   | 'admin-activity'
   | 'admin-analytics'
   | 'admin-subscriptions'
+  | 'admin-risk'
+  | 'admin-binance'
+  | 'admin-affiliate'
+  | 'admin-support'
   | 'admin-ai-providers'
   | 'admin-system-health'
   | 'admin-notifications'
   | 'admin-audit-logs'
+  | 'admin-security'
   | 'admin-settings';
 
 export type AppRoute = UserRoute | AdminRoute;
+
+export interface PublicContactConfig {
+  whatsappUrl: string;
+  telegramUrl: string;
+  supportEmail: string;
+  supportHandle: string;
+}
+
+export interface RiskConfigState {
+  riskLevel: 'CONSERVATIVE' | 'BALANCED' | 'AGGRESSIVE';
+  stopLossPct: number;
+  takeProfitPct: number;
+  maxDailyLossPct: number;
+  tradeAmountUsd: number;
+  selectedPair: string;
+  tradingMode: 'PAPER';
+  realTradingEnabled: false;
+  updatedAt?: string;
+}
+
+export interface SupportTicketItem {
+  id: string;
+  userId: string;
+  username: string;
+  subject: string;
+  category: string;
+  message: string;
+  status: 'OPEN' | 'IN_REVIEW' | 'RESOLVED';
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface UserAccount {
   id: string;

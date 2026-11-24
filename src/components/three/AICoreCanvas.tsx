@@ -1,80 +1,98 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { BotStatus } from '../../types';
 
-interface AICoreCanvasProps {
+interface TradingCandlestickCanvasProps {
   status?: BotStatus;
-  active?: boolean;
   interactive?: boolean;
   variant?: 'hero' | 'compact';
-  className?: string;
+  onPhaseChange?: (phaseIndex: number) => void;
 }
 
-function createSoftParticleTexture(): THREE.CanvasTexture {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.28, 'rgba(96, 165, 250, 0.92)');
-    grad.addColorStop(0.65, 'rgba(37, 99, 235, 0.35)');
-    grad.addColorStop(1, 'rgba(37, 99, 235, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
-  return tex;
+interface CandleSpec {
+  open: number;
+  close: number;
+  high: number;
+  low: number;
 }
 
-export const AICoreCanvas: React.FC<AICoreCanvasProps> = ({
-  status,
-  active = true,
+const CANDLE_SERIES: CandleSpec[] = [
+  { open: -0.95, close: -0.62, high: -0.45, low: -1.12 },
+  { open: -0.62, close: -0.78, high: -0.52, low: -0.96 },
+  { open: -0.78, close: -0.35, high: -0.22, low: -0.88 },
+  { open: -0.35, close: -0.05, high: 0.14, low: -0.46 },
+  { open: -0.05, close: -0.28, high: 0.08, low: -0.41 },
+  { open: -0.28, close: 0.12, high: 0.25, low: -0.34 },
+  { open: 0.12, close: 0.42, high: 0.58, low: 0.04 },
+  { open: 0.42, close: 0.22, high: 0.55, low: 0.11 },
+  { open: 0.22, close: 0.02, high: 0.34, low: -0.14 },
+  { open: 0.02, close: 0.38, high: 0.52, low: -0.06 },
+  { open: 0.38, close: 0.74, high: 0.89, low: 0.30 },
+  { open: 0.74, close: 0.58, high: 0.84, low: 0.46 },
+  { open: 0.58, close: 0.92, high: 1.08, low: 0.50 },
+  { open: 0.92, close: 0.65, high: 1.04, low: 0.54 },
+  { open: 0.65, close: 0.88, high: 1.02, low: 0.56 },
+  { open: 0.88, close: 1.24, high: 1.40, low: 0.80 },
+  { open: 1.24, close: 1.02, high: 1.35, low: 0.91 },
+  { open: 1.02, close: 1.38, high: 1.54, low: 0.96 },
+  { open: 1.38, close: 1.68, high: 1.84, low: 1.28 },
+  { open: 1.68, close: 1.46, high: 1.78, low: 1.32 },
+  { open: 1.46, close: 1.82, high: 1.98, low: 1.38 },
+  { open: 1.82, close: 1.62, high: 1.92, low: 1.50 },
+  { open: 1.62, close: 1.96, high: 2.16, low: 1.55 },
+  { open: 1.96, close: 2.24, high: 2.44, low: 1.88 },
+];
+
+export const TradingCandlestickCanvas: React.FC<TradingCandlestickCanvasProps> = ({
+  status = 'running',
   interactive = true,
   variant = 'hero',
-  className = '',
+  onPhaseChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const resolvedStatus: BotStatus = status ?? (active ? 'running' : 'paused');
-  const statusRef = useRef<BotStatus>(resolvedStatus);
-  statusRef.current = resolvedStatus;
+  const [webglUnsupported, setWebglUnsupported] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const width = Math.max(container.clientWidth, 160);
-    const height = Math.max(container.clientHeight, 160);
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const isCompactViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !isCompactViewport,
         alpha: true,
         powerPreference: 'high-performance',
-        preserveDrawingBuffer: true,
       });
     } catch {
+      setWebglUnsupported(true);
       return;
     }
 
     const gl = renderer.getContext();
-    const dbgInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    const glRenderer = dbgInfo ? String(gl.getParameter(dbgInfo.UNMASKED_RENDERER_WEBGL)) : '';
-    const isSoftwareGl = /swiftshader|llvmpipe|softpipe|software/i.test(glRenderer);
+    let isSoftwareGl = false;
+    try {
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      const unmasked = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '') : '';
+      isSoftwareGl = /swiftshader|llvmpipe|software|mesa offscreen/i.test(unmasked);
+    } catch {
+      isSoftwareGl = false;
+    }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSoftwareGl ? 1 : 2));
-    renderer.setSize(width, height, false);
-    renderer.setClearColor(0x000000, 0);
+    const maxDpr = isSoftwareGl || isCompactViewport ? 1.25 : 2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
+
+    const width = Math.max(container.clientWidth, 280);
+    const height = Math.max(container.clientHeight, 220);
+    renderer.setSize(width, height);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
@@ -82,390 +100,344 @@ export const AICoreCanvas: React.FC<AICoreCanvasProps> = ({
 
     const scene = new THREE.Scene();
 
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envTarget = pmremGenerator.fromScene(new RoomEnvironment(), 0.04);
+    // Environment reflection via RoomEnvironment
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envTarget = pmrem.fromScene(new RoomEnvironment(), 0.04);
     scene.environment = envTarget.texture;
+    scene.environmentIntensity = 0.72;
 
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 0, variant === 'hero' ? 4.9 : 5.3);
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 60);
+    camera.position.set(1.1, 1.55, variant === 'compact' ? 8.2 : 8.7);
+    camera.lookAt(0, 0.25, 0);
 
-    // Bright blue & white studio lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.35);
-    scene.add(ambientLight);
+    // Studio directional & blue rim lighting
+    const ambient = new THREE.AmbientLight(0xdbeafe, 0.45);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    keyLight.position.set(4, 7, 6);
+    const blueRim = new THREE.PointLight(0x3b82f6, 3.2, 22);
+    blueRim.position.set(-4.5, 3.2, 3.5);
+    const emeraldFill = new THREE.PointLight(0x10b981, 1.4, 16);
+    emeraldFill.position.set(4.5, -0.5, 4);
+    scene.add(ambient, keyLight, blueRim, emeraldFill);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    keyLight.position.set(4.2, 4.8, 5.5);
-    scene.add(keyLight);
+    // Root stage group for gentle perspective parallax
+    const chartGroup = new THREE.Group();
+    chartGroup.position.set(0, -0.35, 0);
+    scene.add(chartGroup);
 
-    const blueFillLight = new THREE.PointLight(0x2563eb, 4.2, 16);
-    blueFillLight.position.set(-3.2, -2.0, 3.8);
-    scene.add(blueFillLight);
+    // Perspective Grid Floor
+    const grid = new THREE.GridHelper(13, 18, 0x2563eb, 0x13274c);
+    grid.position.y = -1.45;
+    if (Array.isArray(grid.material)) {
+      grid.material.forEach((m) => {
+        m.transparent = true;
+        m.opacity = 0.42;
+      });
+    } else {
+      grid.material.transparent = true;
+      grid.material.opacity = 0.42;
+    }
+    chartGroup.add(grid);
 
-    const cyanRimLight = new THREE.PointLight(0x60a5fa, 3.6, 16);
-    cyanRimLight.position.set(3.4, 2.6, -2.2);
-    scene.add(cyanRimLight);
+    // Candlesticks
+    const activeSeries = isCompactViewport ? CANDLE_SERIES.slice(-14) : CANDLE_SERIES;
+    const spacing = isCompactViewport ? 0.42 : 0.34;
+    const startX = -((activeSeries.length - 1) * spacing) / 2;
 
-    const rootGroup = new THREE.Group();
-    scene.add(rootGroup);
+    const unitBoxGeo = new THREE.BoxGeometry(isCompactViewport ? 0.22 : 0.19, 1, isCompactViewport ? 0.22 : 0.19);
+    const unitWickGeo = new THREE.CylinderGeometry(0.016, 0.016, 1, 8);
 
-    // 1. Inner Fluid Animated Blue Energy Sphere
-    const coreUniforms = {
-      uTime: { value: 0 },
-      uIntensity: { value: 1.0 },
-      uColorDeep: { value: new THREE.Color(0x1d4ed8) },
-      uColorPrimary: { value: new THREE.Color(0x2563eb) },
-      uColorLight: { value: new THREE.Color(0x60a5fa) },
-      uColorHighlight: { value: new THREE.Color(0xeef6ff) },
-    };
-
-    const fluidCoreGeo = new THREE.SphereGeometry(0.92, isSoftwareGl ? 36 : 64, isSoftwareGl ? 36 : 64);
-    const fluidCoreMat = new THREE.ShaderMaterial({
-      uniforms: coreUniforms,
-      vertexShader: `
-        uniform float uTime;
-        uniform float uIntensity;
-        varying vec3 vNormal;
-        varying vec3 vPos;
-        varying vec3 vViewDir;
-
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vec3 p = position;
-          float wave1 = sin(p.x * 3.8 + uTime * 1.45) * cos(p.y * 3.4 - uTime * 1.15);
-          float wave2 = sin(p.z * 4.2 + uTime * 1.8) * 0.5;
-          float disp = (wave1 + wave2) * 0.042 * uIntensity;
-          vec3 displaced = p + normal * disp;
-          vPos = displaced;
-          vec4 mvPos = modelViewMatrix * vec4(displaced, 1.0);
-          vViewDir = normalize(-mvPos.xyz);
-          gl_Position = projectionMatrix * mvPos;
-        }
-      `,
-      fragmentShader: `
-        uniform float uTime;
-        uniform float uIntensity;
-        uniform vec3 uColorDeep;
-        uniform vec3 uColorPrimary;
-        uniform vec3 uColorLight;
-        uniform vec3 uColorHighlight;
-        varying vec3 vNormal;
-        varying vec3 vPos;
-        varying vec3 vViewDir;
-
-        void main() {
-          vec3 n = normalize(vNormal);
-          vec3 v = normalize(vViewDir);
-          float fresnel = pow(1.0 - max(dot(n, v), 0.0), 2.2);
-
-          float plasmaA = sin(vPos.x * 4.2 + uTime * 1.3) * cos(vPos.y * 3.9 - uTime * 1.1);
-          float plasmaB = sin((vPos.z + vPos.y) * 5.0 + uTime * 1.7);
-          float flow = clamp((plasmaA * 0.5 + plasmaB * 0.5) * 0.5 + 0.5, 0.0, 1.0);
-
-          vec3 base = mix(uColorDeep, uColorPrimary, smoothstep(0.12, 0.72, flow));
-          base = mix(base, uColorLight, smoothstep(0.55, 0.96, flow));
-          base = mix(base, uColorHighlight, fresnel * (0.68 + 0.22 * uIntensity));
-
-          gl_FragColor = vec4(base, 0.96);
-        }
-      `,
-      transparent: true,
-    });
-    const fluidCoreMesh = new THREE.Mesh(fluidCoreGeo, fluidCoreMat);
-    rootGroup.add(fluidCoreMesh);
-
-    // 2. Smooth Optical Glass Outer Shell
-    const glassGeo = new THREE.SphereGeometry(1.16, isSoftwareGl ? 36 : 64, isSoftwareGl ? 36 : 64);
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(0xeaf2ff),
-      roughness: 0.08,
-      metalness: 0.04,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.06,
-      ior: 1.45,
-      reflectivity: 0.9,
-      envMapIntensity: 1.35,
-      transmission: isSoftwareGl ? 0.0 : 0.72,
-      thickness: 0.65,
-      transparent: true,
-      opacity: isSoftwareGl ? 0.26 : 0.95,
-      depthWrite: false,
-    });
-    const glassMesh = new THREE.Mesh(glassGeo, glassMat);
-    rootGroup.add(glassMesh);
-
-    // 3. Soft Inner Halo Shell
-    const haloGeo = new THREE.SphereGeometry(1.28, 32, 32);
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0x60a5fa,
-      transparent: true,
-      opacity: 0.14,
-      side: THREE.BackSide,
-      depthWrite: false,
-    });
-    const haloMesh = new THREE.Mesh(haloGeo, haloMat);
-    rootGroup.add(haloMesh);
-
-    // 4. Smooth Orbital Rings
-    const ring1Geo = new THREE.TorusGeometry(1.56, 0.014, 16, 128);
-    const ring1Mat = new THREE.MeshStandardMaterial({
-      color: 0x2563eb,
-      emissive: 0x3b82f6,
-      emissiveIntensity: 0.42,
-      metalness: 0.55,
-      roughness: 0.2,
-      transparent: true,
-      opacity: 0.78,
-    });
-    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-    ring1.rotation.set(Math.PI * 0.36, Math.PI * 0.12, 0);
-    rootGroup.add(ring1);
-
-    const ring2Geo = new THREE.TorusGeometry(1.78, 0.01, 16, 128);
-    const ring2Mat = new THREE.MeshStandardMaterial({
-      color: 0x60a5fa,
-      emissive: 0x93c5fd,
+    const bullMat = new THREE.MeshPhysicalMaterial({
+      color: 0x10b981,
+      emissive: 0x047857,
       emissiveIntensity: 0.35,
-      metalness: 0.45,
-      roughness: 0.25,
-      transparent: true,
-      opacity: 0.62,
+      roughness: 0.24,
+      metalness: 0.18,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.18,
     });
-    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.set(-Math.PI * 0.28, Math.PI * 0.44, 0.22);
-    rootGroup.add(ring2);
 
-    const ring3Geo = new THREE.TorusGeometry(1.98, 0.007, 12, 128);
-    const ring3Mat = new THREE.MeshBasicMaterial({
-      color: 0x93c5fd,
-      transparent: true,
-      opacity: 0.4,
+    const bearMat = new THREE.MeshPhysicalMaterial({
+      color: 0xef4444,
+      emissive: 0x991b1b,
+      emissiveIntensity: 0.32,
+      roughness: 0.26,
+      metalness: 0.18,
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.2,
     });
-    const ring3 = new THREE.Mesh(ring3Geo, ring3Mat);
-    ring3.rotation.set(Math.PI * 0.48, -Math.PI * 0.2, 0.4);
-    rootGroup.add(ring3);
 
-    // 5. Soft Glowing Floating Particles
-    const particleCount = isSoftwareGl ? 64 : 110;
-    const particlePositions = new Float32Array(particleCount * 3);
-    const particleBaseRadii = new Float32Array(particleCount);
-    const particleAngles = new Float32Array(particleCount);
-    const particleHeights = new Float32Array(particleCount);
+    const bullWickMat = new THREE.MeshStandardMaterial({
+      color: 0x6ee7b7,
+      emissive: 0x10b981,
+      emissiveIntensity: 0.35,
+      roughness: 0.3,
+      metalness: 0.4,
+    });
 
-    for (let i = 0; i < particleCount; i++) {
-      const r = 1.45 + Math.random() * 1.15;
-      const theta = Math.random() * Math.PI * 2;
-      const y = (Math.random() - 0.5) * 2.1;
-      particleBaseRadii[i] = r;
-      particleAngles[i] = theta;
-      particleHeights[i] = y;
-      particlePositions[i * 3] = Math.cos(theta) * r;
-      particlePositions[i * 3 + 1] = y;
-      particlePositions[i * 3 + 2] = Math.sin(theta) * r;
+    const bearWickMat = new THREE.MeshStandardMaterial({
+      color: 0xfca5a5,
+      emissive: 0xef4444,
+      emissiveIntensity: 0.35,
+      roughness: 0.3,
+      metalness: 0.4,
+    });
+
+    interface CandleHandle {
+      body: THREE.Mesh;
+      wick: THREE.Mesh;
+      baseCenterY: number;
+      baseHeight: number;
+      wickCenterY: number;
+      wickHeight: number;
+      index: number;
+      isLastCluster: boolean;
     }
 
+    const candleHandles: CandleHandle[] = [];
+    const emaPoints: THREE.Vector3[] = [];
+    const fastPoints: THREE.Vector3[] = [];
+    let ema = activeSeries[0].close;
+
+    activeSeries.forEach((c, idx) => {
+      const x = startX + idx * spacing;
+      const bullish = c.close >= c.open;
+      const bodyHeight = Math.max(0.11, Math.abs(c.close - c.open));
+      const bodyCenterY = (c.open + c.close) / 2;
+      const wickHeight = Math.max(bodyHeight + 0.1, c.high - c.low);
+      const wickCenterY = (c.high + c.low) / 2;
+
+      const body = new THREE.Mesh(unitBoxGeo, bullish ? bullMat : bearMat);
+      body.position.set(x, bodyCenterY, Math.sin(idx * 0.28) * 0.12);
+      body.scale.set(1, bodyHeight, 1);
+
+      const wick = new THREE.Mesh(unitWickGeo, bullish ? bullWickMat : bearWickMat);
+      wick.position.set(x, wickCenterY, body.position.z);
+      wick.scale.set(1, wickHeight, 1);
+
+      chartGroup.add(body, wick);
+      candleHandles.push({
+        body,
+        wick,
+        baseCenterY: bodyCenterY,
+        baseHeight: bodyHeight,
+        wickCenterY,
+        wickHeight,
+        index: idx,
+        isLastCluster: idx >= activeSeries.length - 5,
+      });
+
+      ema = ema * 0.72 + c.close * 0.28;
+      emaPoints.push(new THREE.Vector3(x, ema + 0.16, body.position.z + 0.26));
+      fastPoints.push(new THREE.Vector3(x, c.close + 0.28, body.position.z + 0.34));
+    });
+
+    // Smooth electric-blue trend spline & silver signal curve
+    const emaCurve = new THREE.CatmullRomCurve3(emaPoints);
+    const emaGeo = new THREE.TubeGeometry(emaCurve, isCompactViewport ? 48 : 84, 0.024, 8, false);
+    const emaMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.92 });
+    const emaMesh = new THREE.Mesh(emaGeo, emaMat);
+    chartGroup.add(emaMesh);
+
+    const fastCurve = new THREE.CatmullRomCurve3(fastPoints);
+    const fastGeo = new THREE.TubeGeometry(fastCurve, isCompactViewport ? 48 : 84, 0.013, 6, false);
+    const fastMat = new THREE.MeshBasicMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.65 });
+    const fastMesh = new THREE.Mesh(fastGeo, fastMat);
+    chartGroup.add(fastMesh);
+
+    // Subtle floating data particles along horizon
+    const particleCount = isCompactViewport ? 22 : 42;
+    const particlePositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 10;
+      particlePositions[i * 3 + 1] = -1.2 + Math.random() * 3.8;
+      particlePositions[i * 3 + 2] = -2.2 + Math.random() * 3.2;
+    }
     const particleGeo = new THREE.BufferGeometry();
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    const particleTex = createSoftParticleTexture();
     const particleMat = new THREE.PointsMaterial({
-      map: particleTex,
-      color: 0x2563eb,
-      size: variant === 'hero' ? 0.14 : 0.12,
+      color: 0x60a5fa,
+      size: 0.045,
       transparent: true,
-      opacity: 0.85,
-      depthWrite: false,
-      blending: THREE.NormalBlending,
+      opacity: 0.5,
     });
     const particles = new THREE.Points(particleGeo, particleMat);
-    rootGroup.add(particles);
+    chartGroup.add(particles);
 
-    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!interactive) return;
+    // Pointer parallax state (zero allocations in loop)
+    let targetRotX = 0.07;
+    let targetRotY = -0.22;
+    const onPointerMove = (e: PointerEvent) => {
+      if (!interactive || prefersReducedMotion) return;
       const rect = container.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      pointer.targetX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      pointer.targetY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      const nx = (e.clientX - rect.left) / rect.width - 0.5;
+      const ny = (e.clientY - rect.top) / rect.height - 0.5;
+      targetRotY = -0.22 + nx * 0.24;
+      targetRotX = 0.07 + ny * 0.14;
+    };
+    const onPointerLeave = () => {
+      targetRotX = 0.07;
+      targetRotY = -0.22;
     };
 
-    const handlePointerLeave = () => {
-      pointer.targetX = 0;
-      pointer.targetY = 0;
-    };
-
-    container.addEventListener('pointermove', handlePointerMove);
-    container.addEventListener('pointerleave', handlePointerLeave);
+    if (interactive) {
+      container.addEventListener('pointermove', onPointerMove, { passive: true });
+      container.addEventListener('pointerleave', onPointerLeave, { passive: true });
+    }
 
     const resizeObserver = new ResizeObserver(() => {
-      if (!container) return;
-      const nextW = Math.max(container.clientWidth, 160);
-      const nextH = Math.max(container.clientHeight, 160);
+      const nextW = Math.max(container.clientWidth, 260);
+      const nextH = Math.max(container.clientHeight, 200);
       camera.aspect = nextW / nextH;
       camera.updateProjectionMatrix();
-      renderer.setSize(nextW, nextH, false);
-      renderer.render(scene, camera);
+      renderer.setSize(nextW, nextH);
     });
     resizeObserver.observe(container);
 
-    // State target palette (Running = vivid blue energy, Paused = calm soft blue, Stopped = cool slate blue)
-    const statePalettes: Record<
-      BotStatus,
-      { deep: number; primary: number; light: number; ring: number; speed: number; intensity: number; halo: number }
-    > = {
-      running: {
-        deep: 0x1d4ed8,
-        primary: 0x2563eb,
-        light: 0x60a5fa,
-        ring: 0x2563eb,
-        speed: 1.0,
-        intensity: 1.0,
-        halo: 0.16,
-      },
-      paused: {
-        deep: 0x3b82f6,
-        primary: 0x60a5fa,
-        light: 0xbfdbfe,
-        ring: 0x60a5fa,
-        speed: 0.34,
-        intensity: 0.45,
-        halo: 0.1,
-      },
-      stopped: {
-        deep: 0x475569,
-        primary: 0x64748b,
-        light: 0x94a3b8,
-        ring: 0x94a3b8,
-        speed: 0.1,
-        intensity: 0.18,
-        halo: 0.05,
-      },
-    };
-
-    let simTime = 0;
-    let lastNow = performance.now();
     let rafId = 0;
     let timerId = 0;
     let disposed = false;
+    let lastPhase = -1;
+    const startMs = performance.now();
 
-    const targetColorDeep = new THREE.Color();
-    const targetColorPrimary = new THREE.Color();
-    const targetColorLight = new THREE.Color();
-    const targetRingColor = new THREE.Color();
+    const renderFrame = (nowMs: number) => {
+      const elapsed = (nowMs - startMs) * 0.001;
+      const speedMult = status === 'stopped' ? 0.25 : status === 'paused' ? 0.5 : 1;
 
-    const stepScene = (now: number) => {
-      const dt = Math.min(0.05, (now - lastNow) / 1000);
-      lastNow = now;
+      if (!prefersReducedMotion) {
+        const t = elapsed * speedMult;
+        chartGroup.rotation.y += (targetRotY + Math.sin(t * 0.35) * 0.06 - chartGroup.rotation.y) * 0.06;
+        chartGroup.rotation.x += (targetRotX - chartGroup.rotation.x) * 0.06;
 
-      const palette = statePalettes[statusRef.current];
-      const speedMult = prefersReducedMotion ? 0.15 : palette.speed;
-      simTime += dt * speedMult;
+        // Subtle live pulse on recent candles
+        for (let i = 0; i < candleHandles.length; i++) {
+          const h = candleHandles[i];
+          const wave = h.isLastCluster
+            ? Math.sin(t * 2.1 + h.index * 0.75) * 0.09
+            : Math.sin(t * 0.9 + h.index * 0.45) * 0.025;
+          h.body.scale.y = Math.max(0.08, h.baseHeight + wave);
+          h.body.position.y = h.baseCenterY + wave * 0.5;
+          h.wick.scale.y = Math.max(0.16, h.wickHeight + wave * 0.8);
+          h.wick.position.y = h.wickCenterY + wave * 0.4;
+        }
 
-      pointer.x += (pointer.targetX - pointer.x) * 0.06;
-      pointer.y += (pointer.targetY - pointer.y) * 0.06;
+        particles.rotation.y = t * 0.03;
 
-      targetColorDeep.setHex(palette.deep);
-      targetColorPrimary.setHex(palette.primary);
-      targetColorLight.setHex(palette.light);
-      targetRingColor.setHex(palette.ring);
-
-      coreUniforms.uTime.value = simTime * 1.4;
-      coreUniforms.uIntensity.value += (palette.intensity - coreUniforms.uIntensity.value) * 0.08;
-      coreUniforms.uColorDeep.value.lerp(targetColorDeep, 0.08);
-      coreUniforms.uColorPrimary.value.lerp(targetColorPrimary, 0.08);
-      coreUniforms.uColorLight.value.lerp(targetColorLight, 0.08);
-
-      ring1Mat.color.lerp(targetRingColor, 0.08);
-      ring1Mat.emissive.lerp(targetRingColor, 0.08);
-      ring1Mat.emissiveIntensity = statusRef.current === 'running' ? 0.45 : statusRef.current === 'paused' ? 0.24 : 0.08;
-      haloMat.opacity += (palette.halo - haloMat.opacity) * 0.08;
-      particleMat.opacity += ((statusRef.current === 'stopped' ? 0.35 : 0.85) - particleMat.opacity) * 0.08;
-
-      const breath = 1 + Math.sin(simTime * 1.8) * (statusRef.current === 'running' ? 0.032 : 0.012);
-      fluidCoreMesh.scale.setScalar(breath);
-      glassMesh.scale.setScalar(1 + Math.sin(simTime * 1.8) * 0.01);
-
-      rootGroup.rotation.y = pointer.x * 0.32 + simTime * 0.16;
-      rootGroup.rotation.x = pointer.y * 0.22;
-
-      ring1.rotation.z = simTime * 0.42;
-      ring1.rotation.x = Math.PI * 0.36 + Math.sin(simTime * 0.5) * 0.08;
-
-      ring2.rotation.z = -simTime * 0.31;
-      ring2.rotation.y = Math.PI * 0.44 + Math.cos(simTime * 0.4) * 0.08;
-
-      ring3.rotation.z = simTime * 0.19;
-
-      const posAttr = particleGeo.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < particleCount; i++) {
-        const theta = particleAngles[i] + simTime * (0.18 + (i % 4) * 0.04);
-        const r = particleBaseRadii[i] + Math.sin(simTime * 1.2 + i) * 0.06;
-        posAttr.array[i * 3] = Math.cos(theta) * r;
-        posAttr.array[i * 3 + 1] = particleHeights[i] + Math.sin(simTime + i * 0.6) * 0.09;
-        posAttr.array[i * 3 + 2] = Math.sin(theta) * r;
-      }
-      posAttr.needsUpdate = true;
-    };
-
-    // Synchronous initial paint before scheduling next frame
-    stepScene(performance.now());
-    renderer.render(scene, camera);
-
-    const scheduleNext = () => {
-      if (disposed) return;
-      if (isSoftwareGl) {
-        timerId = window.setTimeout(() => {
-          if (disposed) return;
-          rafId = requestAnimationFrame(renderLoop);
-        }, 70);
+        if (onPhaseChange) {
+          const nextPhase = Math.floor(t / 3.4) % 3;
+          if (nextPhase !== lastPhase) {
+            lastPhase = nextPhase;
+            onPhaseChange(nextPhase);
+          }
+        }
       } else {
-        rafId = requestAnimationFrame(renderLoop);
+        chartGroup.rotation.set(0.07, -0.22, 0);
       }
-    };
 
-    const renderLoop = (now: number) => {
-      if (disposed) return;
-      stepScene(now);
       renderer.render(scene, camera);
-      scheduleNext();
     };
 
-    scheduleNext();
+    if (prefersReducedMotion) {
+      renderFrame(startMs);
+    } else if (isSoftwareGl) {
+      const loopSoftware = () => {
+        if (disposed) return;
+        renderFrame(performance.now());
+        timerId = window.setTimeout(() => {
+          if (!disposed) rafId = requestAnimationFrame(loopSoftware);
+        }, 42);
+      };
+      rafId = requestAnimationFrame(loopSoftware);
+    } else {
+      const loopGpu = (now: number) => {
+        if (disposed) return;
+        renderFrame(now);
+        rafId = requestAnimationFrame(loopGpu);
+      };
+      rafId = requestAnimationFrame(loopGpu);
+    }
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(rafId);
-      clearTimeout(timerId);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timerId) clearTimeout(timerId);
       resizeObserver.disconnect();
-      container.removeEventListener('pointermove', handlePointerMove);
-      container.removeEventListener('pointerleave', handlePointerLeave);
-      fluidCoreGeo.dispose();
-      fluidCoreMat.dispose();
-      glassGeo.dispose();
-      glassMat.dispose();
-      haloGeo.dispose();
-      haloMat.dispose();
-      ring1Geo.dispose();
-      ring1Mat.dispose();
-      ring2Geo.dispose();
-      ring2Mat.dispose();
-      ring3Geo.dispose();
-      ring3Mat.dispose();
+      if (interactive) {
+        container.removeEventListener('pointermove', onPointerMove);
+        container.removeEventListener('pointerleave', onPointerLeave);
+      }
+      unitBoxGeo.dispose();
+      unitWickGeo.dispose();
+      bullMat.dispose();
+      bearMat.dispose();
+      bullWickMat.dispose();
+      bearWickMat.dispose();
+      emaGeo.dispose();
+      emaMat.dispose();
+      fastGeo.dispose();
+      fastMat.dispose();
       particleGeo.dispose();
       particleMat.dispose();
-      particleTex.dispose();
       envTarget.dispose();
-      pmremGenerator.dispose();
+      pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === container) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [interactive, variant]);
+  }, [status, interactive, variant, onPhaseChange]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={`w-full h-full relative ${className}`}
-      aria-label="OXINVO AI Sphere"
-    />
-  );
+  if (webglUnsupported) {
+    return (
+      <div className="w-full h-full flex items-center justify-center px-6">
+        <svg viewBox="0 0 360 180" className="w-full max-w-md h-auto" aria-hidden="true">
+          <defs>
+            <linearGradient id="ox-fb-line" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#3B82F6" />
+              <stop offset="100%" stopColor="#60A5FA" />
+            </linearGradient>
+          </defs>
+          {CANDLE_SERIES.slice(-16).map((c, idx) => {
+            const x = 18 + idx * 21;
+            const bull = c.close >= c.open;
+            const yTop = 120 - Math.max(c.open, c.close) * 32;
+            const yBot = 120 - Math.min(c.open, c.close) * 32;
+            const yHigh = 120 - c.high * 32;
+            const yLow = 120 - c.low * 32;
+            return (
+              <g key={idx}>
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={yHigh}
+                  y2={yLow}
+                  stroke={bull ? '#34D399' : '#F87171'}
+                  strokeWidth="1.6"
+                />
+                <rect
+                  x={x - 5}
+                  y={yTop}
+                  width="10"
+                  height={Math.max(4, yBot - yTop)}
+                  rx="2"
+                  fill={bull ? '#10B981' : '#EF4444'}
+                />
+              </g>
+            );
+          })}
+          <path
+            d="M18 134 C 90 120, 170 86, 333 44"
+            fill="none"
+            stroke="url(#ox-fb-line)"
+            strokeWidth="2.2"
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  return <div ref={containerRef} className="w-full h-full relative select-none" />;
 };
+
+export const AICoreCanvas = TradingCandlestickCanvas;

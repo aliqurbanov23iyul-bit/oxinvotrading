@@ -4,19 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": "24.x"
+    "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "npm run dev:frontend",
-    "dev:frontend": "vite --port=3000 --host=127.0.0.1 --strictPort",
+    "dev": "tsx server.ts",
+    "start": "tsx server.ts",
+    "dev:frontend": "vite --port=3000 --host=0.0.0.0 --strictPort",
     "dev:backend": "npm run dev --prefix backend",
     "dev:all": "node scripts/run.cjs dev",
     "start:backend": "npm run start --prefix backend",
     "bootstrap:admin": "npm run bootstrap:admin --prefix backend",
     "start:production:backend": "npm run start:production --prefix backend",
-    "build": "node scripts/run.cjs build",
+    "build": "vite build",
     "build:frontend": "vite build",
-    "build:vercel": "npm run build:frontend && node scripts/check-frontend-secrets.cjs",
+    "generate:seo": "node scripts/generate-public-pages.mjs",
+    "build:vercel": "npm run build:frontend && node scripts/generate-public-pages.mjs && node scripts/check-frontend-secrets.cjs",
     "check:frontend-secrets": "node scripts/check-frontend-secrets.cjs",
     "check:repository-secrets": "node scripts/check-repository-secrets.cjs",
     "build:backend": "npm run build --prefix backend",

@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import { Trade } from '../../types';
 import { TranslationDictionary } from '../../i18n/translations';
 import { CustomTabs } from '../../components/ui/CustomTabs';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 import { StatusBadge } from '../../components/ui/StatusBadge';
+import { CoinIcon } from '../../components/ui/CoinIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface TradesViewPageProps {
   t: TranslationDictionary;
@@ -74,16 +77,22 @@ export const TradesViewPage: React.FC<TradesViewPageProps> = ({
           ]}
         />
 
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E2E8F0]">
-            <span className="text-xs text-[#64748B] mr-2">{t.trades.netPnl}:</span>
-            <span className={`font-mono font-semibold ${netPnl >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#0B1324] border border-[#E2E8F0] dark:border-[#1B2942]">
+            <span className="text-xs text-[#64748B] dark:text-[#94A3B8] mr-2">{t.trades.netPnl}:</span>
+            <span
+              className={`font-mono font-semibold ${
+                netPnl >= 0 ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
+              }`}
+            >
               {netPnl >= 0 ? '+' : '-'}${Math.abs(netPnl).toFixed(2)}
             </span>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E2E8F0]">
-            <span className="text-xs text-[#64748B] mr-2">{t.trades.winRate}:</span>
-            <span className="font-mono font-semibold text-[#0F172A]">{winRate.toFixed(0)}%</span>
+          <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#0B1324] border border-[#E2E8F0] dark:border-[#1B2942]">
+            <span className="text-xs text-[#64748B] dark:text-[#94A3B8] mr-2">{t.trades.winRate}:</span>
+            <span className="font-mono font-semibold text-[#0A1428] dark:text-[#F1F5F9]">
+              {winRate.toFixed(0)}%
+            </span>
           </div>
         </div>
       </div>
@@ -115,12 +124,18 @@ export const TradesViewPage: React.FC<TradesViewPageProps> = ({
       {/* Table */}
       <section className="ox-card overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-[#64748B]">{t.trades.empty}</div>
+          <div className="p-6">
+            <EmptyState
+              icon={<ArrowLeftRight className="w-5 h-5" />}
+              title={t.common.noData}
+              description={t.trades.empty}
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                <tr className="border-b border-[#E2E8F0] dark:border-[#1B2942] bg-[#F8FAFC] dark:bg-[#070D19] text-[11px] font-semibold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
                   <th className="py-3.5 px-5">{t.trades.pair}</th>
                   <th className="py-3.5 px-4 text-right">{t.trades.entry}</th>
                   <th className="py-3.5 px-4 text-right">
@@ -132,38 +147,51 @@ export const TradesViewPage: React.FC<TradesViewPageProps> = ({
                   <th className="py-3.5 px-5 text-right">{t.trades.status}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1F5F9] text-sm">
+              <tbody className="divide-y divide-[#F1F5F9] dark:divide-[#16233B] text-sm">
                 {filtered.map((tr) => {
                   const pos = tr.pnlUsd >= 0;
                   return (
                     <tr
                       key={tr.id}
                       onClick={() => onSelectTrade(tr)}
-                      className="hover:bg-[#F8FAFC] cursor-pointer transition-colors"
+                      className="hover:bg-[#F8FAFC] dark:hover:bg-[#0D1629] cursor-pointer transition-colors"
                     >
                       <td className="py-3.5 px-5">
-                        <p className="font-semibold text-[#0F172A]">{tr.symbol}</p>
-                        <p className="text-xs text-[#64748B]">{tr.strategy}</p>
+                        <div className="flex items-center gap-3">
+                          <CoinIcon symbol={tr.symbol} size={28} />
+                          <div>
+                            <p className="font-semibold text-[#0A1428] dark:text-[#F1F5F9]">{tr.symbol}</p>
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{tr.strategy}</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#334155]">
+                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#334155] dark:text-[#CBD5E1]">
                         ${tr.entryPrice}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#0F172A]">
+                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#0A1428] dark:text-[#F1F5F9]">
                         ${mode === 'active' ? tr.currentPrice : tr.exitPrice}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#334155] hidden sm:table-cell">
+                      <td className="py-3.5 px-4 text-right font-mono tabular-nums text-[#334155] dark:text-[#CBD5E1] hidden sm:table-cell">
                         ${tr.amountUsd.toLocaleString()}
                       </td>
                       <td className="py-3.5 px-4 text-right font-mono tabular-nums">
-                        <p className={`font-semibold ${pos ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                        <p
+                          className={`font-semibold ${
+                            pos ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
+                          }`}
+                        >
                           {pos ? '+' : '-'}${Math.abs(tr.pnlUsd).toFixed(2)}
                         </p>
-                        <p className={`text-xs ${pos ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                        <p
+                          className={`text-xs ${
+                            pos ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
+                          }`}
+                        >
                           {pos ? '+' : ''}
                           {tr.pnlPct.toFixed(2)}%
                         </p>
                       </td>
-                      <td className="py-3.5 px-4 text-[#64748B] font-mono text-xs hidden md:table-cell">
+                      <td className="py-3.5 px-4 text-[#64748B] dark:text-[#94A3B8] font-mono text-xs hidden md:table-cell">
                         {tr.durationLabel}
                       </td>
                       <td className="py-3.5 px-5 text-right">

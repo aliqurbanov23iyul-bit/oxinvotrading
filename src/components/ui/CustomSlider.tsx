@@ -27,22 +27,22 @@ export const CustomSlider: React.FC<CustomSliderProps> = ({
     <div className={`w-full ${disabled ? 'opacity-50' : ''}`}>
       {label && (
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-[#475569] font-medium">{label}</span>
-          <span className="font-mono tabular-nums text-[#2563EB] font-semibold">
+          <span className="text-[#475569] dark:text-[#94A3B8] font-medium">{label}</span>
+          <span className="font-mono tabular-nums text-[#2563EB] dark:text-[#60A5FA] font-semibold">
             {value}
             {valueSuffix}
           </span>
         </div>
       )}
       <div className="relative h-6 flex items-center">
-        <div className="w-full h-1.5 rounded-full bg-[#E2E8F0] overflow-hidden">
+        <div className="w-full h-1.5 rounded-full bg-[#E2E8F0] dark:bg-[#1B2942] overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA] rounded-full"
             style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
           />
         </div>
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#2563EB] shadow-sm pointer-events-none"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#0B1324] border-2 border-[#2563EB] dark:border-[#60A5FA] shadow-sm pointer-events-none"
           style={{ left: `${Math.max(0, Math.min(100, pct))}%` }}
         />
         <input

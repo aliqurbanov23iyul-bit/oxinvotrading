@@ -5,29 +5,29 @@
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
   "devCommand": "npm run dev:frontend",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "git": {
-    "deploymentEnabled": false
+    "deploymentEnabled": {
+      "main": false
+    }
   },
   "headers": [
     {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
   ],
@@ -35,6 +35,10 @@
     {
       "source": "/api/:path*",
       "destination": "/api/disabled"
+    },
+    {
+      "source": "/((?!az|en|tr|ru|about|contact|privacy|terms|risk|assets|src|sitemap\\.xml|robots\\.txt|health\\.json|favicon\\.ico).*)",
+      "destination": "/index.html"
     }
   ]
 }

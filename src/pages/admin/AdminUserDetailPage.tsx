@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, KeyRound, Pause, Play, Square } from 'lucide-react';
+import { Activity, ArrowLeft, KeyRound, Pause, Play, Square } from 'lucide-react';
 import { BotStatus, SubscriptionPlan, Trade, UserAccount, UserStatus } from '../../types';
 import {
   TranslationDictionary,
@@ -11,6 +11,8 @@ import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 import { MagneticButton } from '../../components/ui/MagneticButton';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { CustomModal } from '../../components/ui/CustomModal';
+import { CoinIcon } from '../../components/ui/CoinIcon';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface AdminUserDetailPageProps {
   t: TranslationDictionary;
@@ -49,7 +51,7 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A]"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#64748B] dark:text-[#94A3B8] hover:text-[#0A1428] dark:hover:text-[#F1F5F9]"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t.admin.userDetail.back}</span>
@@ -57,7 +59,13 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
 
         <MagneticButton
           variant="secondary"
-          onClick={async () => { try { setIssuedPassword(await onIssuePasswordReset(user.id)); } catch { /* parent displays the safe error */ } }}
+          onClick={async () => {
+            try {
+              setIssuedPassword(await onIssuePasswordReset(user.id));
+            } catch {
+              /* parent displays the safe error */
+            }
+          }}
         >
           <KeyRound className="w-4 h-4" />
           <span>{t.admin.resetPassword}</span>
@@ -66,10 +74,12 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section className="ox-card p-6 lg:col-span-7 space-y-4">
-          <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0]">
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0] dark:border-[#1B2942]">
             <div>
-              <h2 className="font-display font-bold text-xl text-[#0F172A]">{user.fullName}</h2>
-              <p className="text-xs font-mono text-[#64748B]">@{user.username}</p>
+              <h2 className="font-display font-bold text-xl text-[#0A1428] dark:text-[#F1F5F9]">
+                {user.fullName}
+              </h2>
+              <p className="text-xs font-mono text-[#64748B] dark:text-[#94A3B8]">@{user.username}</p>
             </div>
             <StatusBadge
               tone={user.status === 'active' ? 'emerald' : user.status === 'suspended' ? 'amber' : 'red'}
@@ -77,7 +87,7 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
             />
           </div>
 
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
             {t.admin.userDetail.editPlan}
           </h3>
 
@@ -113,14 +123,14 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
           />
 
           <div>
-            <label className="block text-xs font-medium text-[#64748B] mb-1.5">
+            <label className="block text-xs font-medium text-[#64748B] dark:text-[#94A3B8] mb-1.5">
               {t.admin.createUserModal.notes}
             </label>
             <textarea
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-white dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942] text-[#0A1428] dark:text-[#F1F5F9] focus:outline-none focus:border-[#2563EB]"
             />
           </div>
 
@@ -130,7 +140,7 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
         <div className="lg:col-span-5 space-y-6">
           <section className="ox-card p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-semibold text-base text-[#0F172A]">
+              <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
                 {t.admin.userDetail.botControl}
               </h3>
               <StatusBadge
@@ -176,18 +186,22 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
           </section>
 
           <section className="ox-card p-6 space-y-3">
-            <h3 className="font-display font-semibold text-base text-[#0F172A]">
+            <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9]">
               {t.admin.userDetail.connections}
             </h3>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-              <span className="text-sm font-medium text-[#334155]">{t.admin.userDetail.binance}</span>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+              <span className="text-sm font-medium text-[#334155] dark:text-[#CBD5E1]">
+                {t.admin.userDetail.binance}
+              </span>
               <StatusBadge
                 tone={user.binanceConnected ? 'emerald' : 'slate'}
                 label={user.binanceConnected ? t.connections.connected : t.connections.notConnected}
               />
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-              <span className="text-sm font-medium text-[#334155]">{t.admin.userDetail.telegram}</span>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#070D19] border border-[#E2E8F0] dark:border-[#1B2942]">
+              <span className="text-sm font-medium text-[#334155] dark:text-[#CBD5E1]">
+                {t.admin.userDetail.telegram}
+              </span>
               <StatusBadge
                 tone={user.telegramConnected ? 'emerald' : 'slate'}
                 label={user.telegramConnected ? t.connections.connected : t.connections.notConnected}
@@ -198,25 +212,36 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
       </div>
 
       <section className="ox-card p-6">
-        <h3 className="font-display font-semibold text-base text-[#0F172A] mb-4">
+        <h3 className="font-display font-semibold text-base text-[#0A1428] dark:text-[#F1F5F9] mb-4">
           {t.admin.userDetail.userTrades}
         </h3>
-        <div className="divide-y divide-[#F1F5F9]">
-          {userTrades.slice(0, 5).map((tr) => {
-            const pos = tr.pnlUsd >= 0;
-            return (
-              <div key={tr.id} className="py-3 flex items-center justify-between text-sm">
-                <div>
-                  <span className="font-semibold text-[#0F172A]">{tr.symbol}</span>
-                  <span className="text-xs text-[#64748B] ml-2">{tr.strategy}</span>
+        {userTrades.length === 0 ? (
+          <EmptyState compact icon={<Activity className="w-5 h-5" />} title={t.common.noData} />
+        ) : (
+          <div className="divide-y divide-[#F1F5F9] dark:divide-[#16233B]">
+            {userTrades.slice(0, 5).map((tr) => {
+              const pos = tr.pnlUsd >= 0;
+              return (
+                <div key={tr.id} className="py-3 flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2.5">
+                    <CoinIcon symbol={tr.symbol} size={24} />
+                    <div>
+                      <span className="font-semibold text-[#0A1428] dark:text-[#F1F5F9]">{tr.symbol}</span>
+                      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] ml-2">{tr.strategy}</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`font-mono font-semibold ${
+                      pos ? 'text-[#059669] dark:text-[#34D399]' : 'text-[#DC2626] dark:text-[#F87171]'
+                    }`}
+                  >
+                    {pos ? '+' : '-'}${Math.abs(tr.pnlUsd).toFixed(2)}
+                  </span>
                 </div>
-                <span className={`font-mono font-semibold ${pos ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                  {pos ? '+' : '-'}${Math.abs(tr.pnlUsd).toFixed(2)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <CustomModal
@@ -227,8 +252,8 @@ export const AdminUserDetailPage: React.FC<AdminUserDetailPageProps> = ({
       >
         {issuedPassword && (
           <div className="space-y-4">
-            <p className="text-xs text-[#64748B]">{t.admin.createUserModal.passwordNote}</p>
-            <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] font-mono text-sm font-bold text-[#0F172A] text-center">
+            <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{t.admin.createUserModal.passwordNote}</p>
+            <div className="p-3.5 rounded-xl bg-[#EFF6FF] dark:bg-[#111C33] border border-[#BFDBFE] dark:border-[#1E3A8A] font-mono text-sm font-bold text-[#0A1428] dark:text-[#F1F5F9] text-center">
               {issuedPassword}
             </div>
             <div className="flex justify-end">

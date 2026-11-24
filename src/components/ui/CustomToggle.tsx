@@ -31,13 +31,15 @@ export const CustomToggle: React.FC<CustomToggleProps> = ({
     >
       {(label || description) && (
         <span className="flex flex-col">
-          {label && <span className="text-sm font-medium text-[#0F172A]">{label}</span>}
-          {description && <span className="text-xs text-[#64748B] mt-0.5">{description}</span>}
+          {label && <span className="text-sm font-medium text-[#0A1428] dark:text-[#F1F5F9]">{label}</span>}
+          {description && <span className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">{description}</span>}
         </span>
       )}
       <span
         className={`relative inline-flex shrink-0 items-center w-11 h-6 rounded-full transition-colors duration-200 ${
-          checked ? 'bg-[#2563EB]' : 'bg-[#CBD5E1] group-hover:bg-[#94A3B8]'
+          checked
+            ? 'bg-[#2563EB]'
+            : 'bg-[#CBD5E1] dark:bg-[#1B2942] group-hover:bg-[#94A3B8] dark:group-hover:bg-[#273A5C]'
         }`}
       >
         <span
